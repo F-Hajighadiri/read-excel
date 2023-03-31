@@ -1,6 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from openpyxl import load_workbook
+from openpyxl import load_workbook, Workbook
 
 ws = load_workbook("log data.xlsx")["sheet"]
 max_row = ws.max_row
@@ -19,12 +18,19 @@ dx = x[1:] - x[:-1]
 deriv = dy/dx
 
 ddy = dy[1:] - dy[:-1]
-second_deriv = ddy/dx
+second_deriv = y.copy()
+second_deriv[2:] = ddy/dx
+second_deriv[0] = y[0]
+second_deriv[1] = y[1]
 
-plt.plot(x, y, label="log")
-plt.plot(x[:-1], deriv, label="1st deriv")
-plt.plot(x[:-2], second_deriv, label="2nd deriv")
-plt.xlabel("x")
-plt.ylabel("y")
-plt.legend()
-plt.show()
+# write data in an elsx file (in wb)  :
+wb_save = Workbook()               
+ws_save = wb_save.active
+
+i = 0
+for x_i in x :
+    ws_save[f"A{i+1}"] = x_i
+    ws_save[f"B{i+1}"] = second_deriv[i]
+    i += 1
+
+wb_save.save("second_deriv.xlsx")
